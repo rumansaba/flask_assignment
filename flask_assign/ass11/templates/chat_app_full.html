@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        function sendMessage() {
+            var message = document.getElementById("message").value;
+            if (message.trim() !== '') {
+                socket.emit('message', {'message': message});
+                document.getElementById("message").value = "";
+            }
+        }
+
+        socket.on('message', function (data) {
+            var chatDiv = document.getElementById("chat");
+            var messageDiv = document.createElement("div");
+            var usernameSpan = document.createElement("span");
+            var messageSpan = document.createElement("span");
+
+            usernameSpan.className = "font-weight-bold text-primary";
+            messageSpan.className = "ml-2";
+
+            usernameSpan.appendChild(document.createTextNode(data.username + ": "));
+            messageSpan.appendChild(document.createTextNode(data.message));
+
+            messageDiv.appendChild(usernameSpan);
+            messageDiv.appendChild(messageSpan);
+
+            chatDiv.appendChild(messageDiv);
+
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        Real-Time Chat - Welcome, {{ username }}!
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm float-right">Logout</a>
+                    </div>
+                    <div class="card-body" id="chat" style="height: 300px; overflow-y: scroll;">
+                        <!-- Chat messages will be displayed here -->
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group">
+                            <input type="text" id="message" class="form-control" placeholder="Type your message">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
